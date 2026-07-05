@@ -6,7 +6,20 @@ Página interativa para autoavaliação de sintomas de TDAH em adultos usando a 
 O teste roda inteiramente no navegador, é **mobile-first** e **não salva nada** — as
 respostas e o resultado existem apenas durante a sessão.
 
-**No ar:** _(defina a URL de deploy)_
+**No ar (GitHub Pages):** https://leobeckerdesign.github.io/TDAH-test/
+
+Existem duas formas de rodar este projeto:
+
+- **Versão single-file** — [`docs/index.html`](docs/index.html): a página inteira (HTML + CSS + JS)
+  em um único arquivo, sem build. É a que o GitHub Pages publica. Basta abrir o arquivo em
+  qualquer navegador.
+- **Versão Vite/React** — o código-fonte em [`src/`](src), para desenvolvimento e build.
+
+### Ativar o GitHub Pages (link público)
+
+Em **Settings → Pages** do repositório, escolha **Source: _Deploy from a branch_**, branch
+**`main`** e pasta **`/docs`**. Em ~1 minuto o teste fica público em
+`https://leobeckerdesign.github.io/TDAH-test/`.
 
 ## Metodologia
 
