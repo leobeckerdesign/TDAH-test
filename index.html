@@ -1,17 +1,436 @@
 <!doctype html>
 <html lang="pt-BR">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#0f172a" />
-    <meta
-      name="description"
-      content="Teste interativo de autoavaliação de TDAH em adultos (ASRS-18). Resultado imediato, sem cadastro."
-    />
-    <title>Teste de TDAH · ASRS-18</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#0d7d74" />
+<meta name="description" content="Teste interativo de autoavaliação de TDAH em adultos (escala ASRS-18 / ASRS-v1.1). Resultado imediato, anônimo, sem cadastro." />
+<title>Teste de TDAH · ASRS-18</title>
+<style>
+  :root {
+    --paper: #f7f9fa;
+    --surface: #ffffff;
+    --ink: #14202b;
+    --ink-2: #4a5763;
+    --ink-3: #8a96a2;
+    --line: #e5ebef;
+    --line-strong: #d3dce1;
+    --accent: #0d7d74;
+    --accent-hover: #0a655e;
+    --accent-ink: #ffffff;
+    --accent-soft: #e4f1ef;
+    --attn: #b45309;
+    --attn-soft: #fbeed6;
+    --attn-line: #eed6a6;
+    --shadow: 0 1px 2px rgba(20, 32, 43, .04), 0 12px 40px rgba(20, 32, 43, .10);
+    --radius: 18px;
+    --serif: Georgia, 'Times New Roman', 'Nimbus Roman', serif;
+    --sans: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #0d1417;
+      --surface: #141d21;
+      --ink: #e9eff0;
+      --ink-2: #a2b1b4;
+      --ink-3: #6c7d81;
+      --line: #263238;
+      --line-strong: #33454c;
+      --accent: #35b0a3;
+      --accent-hover: #47c2b4;
+      --accent-ink: #06231f;
+      --accent-soft: #123430;
+      --attn: #e2a54c;
+      --attn-soft: #2b2213;
+      --attn-line: #4b3a1d;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 16px 44px rgba(0,0,0,.45);
+    }
+  }
+  :root[data-theme="light"] {
+    --paper: #f7f9fa; --surface: #ffffff; --ink: #14202b; --ink-2: #4a5763; --ink-3: #8a96a2;
+    --line: #e5ebef; --line-strong: #d3dce1; --accent: #0d7d74; --accent-hover: #0a655e;
+    --accent-ink: #ffffff; --accent-soft: #e4f1ef; --attn: #b45309; --attn-soft: #fbeed6;
+    --attn-line: #eed6a6; --shadow: 0 1px 2px rgba(20,32,43,.04), 0 12px 40px rgba(20,32,43,.10);
+  }
+  :root[data-theme="dark"] {
+    --paper: #0d1417; --surface: #141d21; --ink: #e9eff0; --ink-2: #a2b1b4; --ink-3: #6c7d81;
+    --line: #263238; --line-strong: #33454c; --accent: #35b0a3; --accent-hover: #47c2b4;
+    --accent-ink: #06231f; --accent-soft: #123430; --attn: #e2a54c; --attn-soft: #2b2213;
+    --attn-line: #4b3a1d; --shadow: 0 1px 2px rgba(0,0,0,.3), 0 16px 44px rgba(0,0,0,.45);
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: var(--sans);
+    color: var(--ink);
+    background:
+      radial-gradient(1100px 520px at 50% -8%, color-mix(in srgb, var(--accent) 10%, var(--paper)) 0%, var(--paper) 60%);
+    background-attachment: fixed;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    line-height: 1.55;
+  }
+  .wrap {
+    min-height: 100dvh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 24px 16px calc(40px + env(safe-area-inset-bottom));
+  }
+  .card {
+    width: 100%;
+    max-width: 600px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 30px 24px;
+    margin-top: 12px;
+  }
+  @media (min-width: 500px) { .card { padding: 40px 38px; } }
+
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 12px; font-weight: 600; letter-spacing: .09em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 14px;
+  }
+  .eyebrow::before {
+    content: ""; width: 18px; height: 2px; background: var(--accent); border-radius: 2px;
+  }
+  h1 {
+    font-family: var(--serif); font-weight: 600; font-size: clamp(30px, 8vw, 40px);
+    line-height: 1.08; letter-spacing: -0.01em; margin: 0 0 10px; text-wrap: balance;
+  }
+  .lede { color: var(--ink-2); font-size: 16px; margin: 0 0 18px; max-width: 52ch; }
+  p { color: var(--ink-2); margin: 0 0 16px; }
+  strong { color: var(--ink); }
+
+  .rule { height: 1px; background: var(--line); border: 0; margin: 22px 0; }
+
+  .meta-list { display: grid; gap: 14px; margin: 4px 0 22px; }
+  .meta-item { display: flex; gap: 12px; align-items: flex-start; }
+  .meta-item .k {
+    flex: none; width: 26px; height: 26px; border-radius: 8px; display: grid; place-items: center;
+    font-size: 13px; font-weight: 700; font-family: var(--serif);
+    background: var(--accent-soft); color: var(--accent);
+  }
+  .meta-item .t { font-size: 14.5px; color: var(--ink-2); }
+  .meta-item .t b { color: var(--ink); font-weight: 600; }
+
+  .callout {
+    font-size: 13.5px; color: var(--ink-2); line-height: 1.5;
+    background: var(--attn-soft); border: 1px solid var(--attn-line);
+    border-radius: 13px; padding: 14px 16px; margin: 6px 0 24px;
+  }
+  .callout b { color: var(--ink); }
+
+  .btn {
+    appearance: none; font-family: inherit; font-size: 16px; font-weight: 600;
+    border-radius: 13px; padding: 15px 22px; cursor: pointer; width: 100%;
+    border: 1px solid transparent; transition: background .15s, border-color .15s, transform .05s, color .15s;
+  }
+  .btn:active { transform: translateY(1px); }
+  .btn.primary { background: var(--accent); color: var(--accent-ink); }
+  .btn.primary:hover { background: var(--accent-hover); }
+  .btn.ghost { background: transparent; color: var(--ink-2); border-color: var(--line-strong); width: auto; padding: 12px 18px; font-size: 15px; }
+  .btn.ghost:hover { color: var(--ink); border-color: var(--ink-3); }
+  .btn.ghost:disabled { opacity: .4; cursor: default; }
+  .btn.ghost.full { width: 100%; }
+  .btn:focus-visible, .option:focus-visible, .theme-btn:focus-visible {
+    outline: 2px solid var(--accent); outline-offset: 2px;
+  }
+  .start-note { text-align: center; font-size: 12.5px; color: var(--ink-3); margin: 14px 0 0; }
+
+  /* progress + quiz */
+  .qhead { margin-bottom: 24px; }
+  .progress { height: 6px; background: var(--line); border-radius: 999px; overflow: hidden; }
+  .progress > i { display: block; height: 100%; background: var(--accent); border-radius: 999px; transition: width .3s ease; }
+  .qmeta { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; }
+  .badge { font-size: 11.5px; font-weight: 700; letter-spacing: .04em; padding: 4px 10px; border-radius: 999px; }
+  .badge.a { background: var(--accent-soft); color: var(--accent); }
+  .badge.b { background: color-mix(in srgb, var(--ink-3) 16%, transparent); color: var(--ink-2); }
+  .count { font-size: 14.5px; font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; }
+  .count small { color: var(--ink-3); font-weight: 500; }
+
+  .prompt { font-size: 12px; font-weight: 600; letter-spacing: .07em; text-transform: uppercase; color: var(--ink-3); margin: 0 0 4px; }
+  .question { font-size: clamp(20px, 5.4vw, 23px); line-height: 1.32; letter-spacing: -0.01em; margin: 6px 0 22px; color: var(--ink); text-wrap: pretty; font-weight: 600; }
+
+  .options { display: flex; flex-direction: column; gap: 9px; }
+  .option {
+    display: flex; align-items: center; gap: 13px; text-align: left; width: 100%;
+    background: var(--surface); border: 1.5px solid var(--line); border-radius: 13px;
+    padding: 15px 16px; font-family: inherit; font-size: 16px; font-weight: 500; color: var(--ink);
+    cursor: pointer; transition: border-color .12s, background .12s;
+  }
+  .option .dot { flex: none; width: 20px; height: 20px; border-radius: 999px; border: 2px solid var(--ink-3); transition: all .12s; }
+  .option:hover { border-color: var(--accent); }
+  .option.on { border-color: var(--accent); background: var(--accent-soft); }
+  .option.on .dot { border-color: var(--accent); background: var(--accent); box-shadow: inset 0 0 0 3.5px var(--surface); }
+
+  .qnav { display: flex; justify-content: space-between; gap: 10px; margin-top: 24px; }
+
+  /* result */
+  .verdict { display: flex; align-items: center; gap: 18px; border-radius: 15px; padding: 20px; margin-bottom: 20px; border: 1px solid var(--line); }
+  .verdict.pos { background: var(--attn-soft); border-color: var(--attn-line); }
+  .verdict.neg { background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 22%, transparent); }
+  .vscore { font-family: var(--serif); font-size: 46px; font-weight: 600; line-height: 1; letter-spacing: -0.02em; flex: none; font-variant-numeric: tabular-nums; }
+  .verdict.pos .vscore { color: var(--attn); }
+  .verdict.neg .vscore { color: var(--accent); }
+  .vscore small { font-size: 19px; opacity: .55; }
+  .vtext { display: flex; flex-direction: column; gap: 3px; }
+  .vtext b { font-family: var(--serif); font-size: 18px; font-weight: 600; color: var(--ink); line-height: 1.2; }
+  .vtext span { font-size: 13px; color: var(--ink-2); }
+
+  .lead-p { color: var(--ink); font-size: 15.5px; margin-bottom: 22px; }
+
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; margin-bottom: 16px; }
+  .stat { background: color-mix(in srgb, var(--ink-3) 8%, transparent); border: 1px solid var(--line); border-radius: 13px; padding: 15px 8px; text-align: center; }
+  .stat .n { display: block; font-size: 25px; font-weight: 700; color: var(--ink); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+  .stat .n small { font-size: 14px; font-weight: 600; color: var(--ink-3); }
+  .stat .l { display: block; font-size: 11px; font-weight: 600; color: var(--ink-2); margin-top: 3px; }
+
+  .note-b { font-size: 13px; color: var(--ink-3); margin-bottom: 18px; }
+
+  .detail { list-style: none; margin: 0 0 20px; padding: 0; border: 1px solid var(--line); border-radius: 13px; overflow: hidden; }
+  .detail li { padding: 13px 15px; border-bottom: 1px solid var(--line); }
+  .detail li:last-child { border-bottom: 0; }
+  .detail li.sh { background: var(--attn-soft); }
+  .drow { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+  .dn { font-size: 13px; font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; }
+  .dn em { font-weight: 500; color: var(--ink-3); font-style: normal; font-size: 12px; }
+  .dans { font-size: 13px; font-weight: 600; color: var(--ink-2); white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; }
+  .dans .mk { color: var(--attn); font-size: 9px; }
+  .dq { font-size: 13px; color: var(--ink-2); margin: 5px 0 0; }
+
+  .credits { font-size: 12px; color: var(--ink-3); text-align: center; margin: 18px 0 0; line-height: 1.5; }
+  .credits a { color: var(--ink-2); }
+
+  .theme-toggle { position: fixed; top: 14px; right: 14px; z-index: 5; }
+  .theme-btn {
+    width: 40px; height: 40px; border-radius: 999px; border: 1px solid var(--line);
+    background: var(--surface); color: var(--ink-2); cursor: pointer; display: grid; place-items: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,.08); font-size: 17px; line-height: 1;
+  }
+  .theme-btn:hover { color: var(--ink); }
+
+  .fade { animation: fade .28s ease; }
+  @keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) {
+    .fade { animation: none; }
+    .progress > i, .btn, .option { transition: none; }
+  }
+</style>
+</head>
+<body>
+<div class="theme-toggle">
+  <button class="theme-btn" id="theme" aria-label="Alternar tema claro/escuro" title="Alternar tema">◑</button>
+</div>
+
+<div class="wrap">
+  <main class="card" id="app" aria-live="polite"></main>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var OPTIONS = ["Nunca", "Quase nunca", "De vez em quando", "Quase sempre", "Sempre"];
+
+  // shadedFrom: menor índice que cai na "área sombreada".
+  // 2 = a partir de "De vez em quando" · 3 = a partir de "Quase sempre".
+  var QUESTIONS = [
+    { n:1,  part:"A", s:2, t:"Com que frequência você deixa um projeto pela metade depois de já ter feito as partes mais difíceis?" },
+    { n:2,  part:"A", s:2, t:"Com que frequência você tem dificuldade para fazer um trabalho que exige organização?" },
+    { n:3,  part:"A", s:2, t:"Com que frequência você tem dificuldade para lembrar de compromissos ou obrigações?" },
+    { n:4,  part:"A", s:3, t:"Quando você precisa fazer algo que exige muita concentração, com que frequência você evita ou adia o início?" },
+    { n:5,  part:"A", s:3, t:"Com que frequência você fica se mexendo na cadeira ou balançando as mãos ou os pés quando precisa ficar sentado(a) por muito tempo?" },
+    { n:6,  part:"A", s:3, t:"Com que frequência você se sente ativo(a) demais e necessitando fazer coisas, como se estivesse com um motor ligado?" },
+    { n:7,  part:"B", s:3, t:"Com que frequência você comete erros bobos por falta de atenção quando tem de trabalhar num projeto chato ou difícil?" },
+    { n:8,  part:"B", s:3, t:"Com que frequência você tem dificuldade para manter a atenção quando está fazendo um trabalho chato ou repetitivo?" },
+    { n:9,  part:"B", s:3, t:"Com que frequência você tem dificuldade para se concentrar no que as pessoas dizem, mesmo quando elas estão falando diretamente com você?" },
+    { n:10, part:"B", s:2, t:"Com que frequência você coloca as coisas fora do lugar ou tem dificuldade de encontrar as coisas em casa ou no trabalho?" },
+    { n:11, part:"B", s:3, t:"Com que frequência você se distrai com atividades ou barulho a sua volta?" },
+    { n:12, part:"B", s:3, t:"Com que frequência você se sente inquieto(a) ou agitado(a)?" },
+    { n:13, part:"B", s:2, t:"Com que frequência você tem dificuldade para sossegar e relaxar quando tem tempo livre para você?" },
+    { n:14, part:"B", s:2, t:"Com que frequência você se pega falando demais em situações sociais?" },
+    { n:15, part:"B", s:2, t:"Com que frequência você se levanta da cadeira em reuniões ou em outras situações onde deveria ficar sentado(a)?" },
+    { n:16, part:"B", s:2, t:"Quando você está conversando, com que frequência você se pega terminando as frases das pessoas antes delas?" },
+    { n:17, part:"B", s:3, t:"Com que frequência você tem dificuldade para esperar nas situações onde cada um tem a sua vez?" },
+    { n:18, part:"B", s:2, t:"Com que frequência você interrompe os outros quando eles estão ocupados?" }
+  ];
+
+  var state = { screen: "intro", answers: {}, index: 0 };
+  var app = document.getElementById("app");
+
+  function esc(str) {
+    return String(str).replace(/[&<>"]/g, function (c) {
+      return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c];
+    });
+  }
+
+  function score(ans) {
+    var aShaded = 0, bShaded = 0, raw = 0, answered = 0;
+    QUESTIONS.forEach(function (q) {
+      var v = ans[q.n];
+      if (v === undefined) return;
+      answered++; raw += v;
+      if (v >= q.s) { if (q.part === "A") aShaded++; else bShaded++; }
+    });
+    return {
+      complete: answered === QUESTIONS.length,
+      aShaded: aShaded, bShaded: bShaded, total: aShaded + bShaded,
+      positive: aShaded >= 4, raw: raw
+    };
+  }
+
+  function render() {
+    if (state.screen === "intro") renderIntro();
+    else if (state.screen === "quiz") renderQuiz();
+    else renderResult();
+    app.classList.remove("fade"); void app.offsetWidth; app.classList.add("fade");
+    app.scrollIntoView({ block: "start", behavior: "auto" });
+  }
+
+  function renderIntro() {
+    app.innerHTML =
+      '<span class="eyebrow">Autoavaliação · Adultos</span>' +
+      '<h1>Teste de TDAH</h1>' +
+      '<p class="lede">Escala ASRS-18 (ASRS-v1.1), desenvolvida com a Organização Mundial da Saúde. São 18 perguntas sobre a frequência dos sintomas nos últimos 6 meses — cerca de 5 minutos.</p>' +
+      '<div class="meta-list">' +
+        '<div class="meta-item"><span class="k">A</span><span class="t"><b>Parte A · perguntas 1 a 6.</b> A triagem principal. Quatro ou mais respostas na faixa de maior frequência indicam sintomas altamente compatíveis com TDAH.</span></div>' +
+        '<div class="meta-item"><span class="k">B</span><span class="t"><b>Parte B · perguntas 7 a 18.</b> Complementa a avaliação com informações mais detalhadas. Não tem pontuação mínima.</span></div>' +
+      '</div>' +
+      '<div class="callout"><b>Importante:</b> este teste não faz diagnóstico. Ele é apenas um ponto de partida. O diagnóstico de TDAH só pode ser feito por um profissional de saúde (psiquiatra, neurologista) em uma avaliação completa. Nada é salvo — as respostas ficam apenas nesta sessão.</div>' +
+      '<button class="btn primary" id="start">Iniciar teste</button>' +
+      '<p class="start-note">Anônimo · sem cadastro · resultado imediato</p>';
+    document.getElementById("start").onclick = function () {
+      state.screen = "quiz"; state.index = 0; render();
+    };
+  }
+
+  function renderQuiz() {
+    var q = QUESTIONS[state.index];
+    var total = QUESTIONS.length;
+    var cur = state.answers[q.n];
+    var isLast = state.index === total - 1;
+    var pct = ((state.index + 1) / total) * 100;
+
+    var opts = OPTIONS.map(function (label, i) {
+      return '<button class="option' + (cur === i ? " on" : "") + '" data-i="' + i + '" role="radio" aria-checked="' + (cur === i) + '">' +
+        '<span class="dot" aria-hidden="true"></span>' + esc(label) + '</button>';
+    }).join("");
+
+    app.innerHTML =
+      '<div class="qhead">' +
+        '<div class="progress"><i style="width:' + pct + '%"></i></div>' +
+        '<div class="qmeta">' +
+          '<span class="badge ' + (q.part === "A" ? "a" : "b") + '">Parte ' + q.part + '</span>' +
+          '<span class="count">' + (state.index + 1) + ' <small>de ' + total + '</small></span>' +
+        '</div>' +
+      '</div>' +
+      '<p class="prompt">Com que frequência isso acontece com você?</p>' +
+      '<h2 class="question">' + esc(q.t) + '</h2>' +
+      '<div class="options" role="radiogroup" aria-label="Frequência">' + opts + '</div>' +
+      '<div class="qnav">' +
+        '<button class="btn ghost" id="back"' + (state.index === 0 ? " disabled" : "") + '>Voltar</button>' +
+        (cur !== undefined
+          ? '<button class="btn ghost" id="fwd">' + (isLast ? "Ver resultado" : "Avançar") + '</button>'
+          : '') +
+      '</div>';
+
+    Array.prototype.forEach.call(app.querySelectorAll(".option"), function (el) {
+      el.onclick = function () {
+        var i = parseInt(el.getAttribute("data-i"), 10);
+        state.answers[q.n] = i;
+        setTimeout(function () {
+          if (isLast) { state.screen = "result"; }
+          else { state.index++; }
+          render();
+        }, 170);
+      };
+    });
+    var back = document.getElementById("back");
+    if (back) back.onclick = function () { if (state.index > 0) { state.index--; render(); } };
+    var fwd = document.getElementById("fwd");
+    if (fwd) fwd.onclick = function () {
+      if (isLast) { state.screen = "result"; render(); }
+      else { state.index++; render(); }
+    };
+  }
+
+  function renderResult() {
+    var r = score(state.answers);
+    var pos = r.positive;
+
+    var verdict =
+      '<div class="verdict ' + (pos ? "pos" : "neg") + '">' +
+        '<div class="vscore">' + r.aShaded + '<small>/6</small></div>' +
+        '<div class="vtext">' +
+          '<b>' + (pos ? "Sintomas altamente compatíveis com TDAH" : "Sintomas menos consistentes com TDAH") + '</b>' +
+          '<span>' + r.aShaded + ' de 6 respostas da Parte A na faixa de maior frequência · limiar da triagem: 4 ou mais.</span>' +
+        '</div>' +
+      '</div>';
+
+    var lead = pos
+      ? 'Suas respostas na Parte A são <strong>altamente compatíveis</strong> com um quadro de TDAH em adultos. É recomendável procurar um profissional de saúde para uma investigação mais precisa.'
+      : 'Suas respostas na Parte A ficaram <strong>abaixo do limiar</strong> de triagem. Isso não descarta TDAH — se os sintomas afetam o seu dia a dia, vale conversar com um profissional.';
+
+    var stats =
+      '<div class="stats">' +
+        '<div class="stat"><span class="n">' + r.aShaded + '<small>/6</small></span><span class="l">Parte A · triagem</span></div>' +
+        '<div class="stat"><span class="n">' + r.bShaded + '<small>/12</small></span><span class="l">Parte B · complementar</span></div>' +
+        '<div class="stat"><span class="n">' + r.total + '<small>/18</small></span><span class="l">Total sombreado</span></div>' +
+      '</div>';
+
+    var rows = QUESTIONS.map(function (q) {
+      var v = state.answers[q.n];
+      var shaded = v !== undefined && v >= q.s;
+      return '<li class="' + (shaded ? "sh" : "") + '">' +
+        '<div class="drow">' +
+          '<span class="dn">' + q.n + '. <em>Parte ' + q.part + '</em></span>' +
+          '<span class="dans">' + (v !== undefined ? esc(OPTIONS[v]) : "—") + (shaded ? '<span class="mk" title="Faixa de maior frequência">●</span>' : "") + '</span>' +
+        '</div>' +
+        '<p class="dq">' + esc(q.t) + '</p>' +
+      '</li>';
+    }).join("");
+
+    app.innerHTML =
+      '<span class="eyebrow">Resultado</span>' +
+      verdict +
+      '<p class="lead-p">' + lead + '</p>' +
+      stats +
+      '<p class="note-b">A Parte B não tem pontuação mínima — ela oferece informações mais detalhadas de apoio, com atenção especial às marcações na faixa de maior frequência (●).</p>' +
+      '<button class="btn ghost full" id="toggle" aria-expanded="false">Ver minhas respostas</button>' +
+      '<ul class="detail" id="detail" hidden>' + rows + '</ul>' +
+      '<div class="callout">Resultado meramente informativo. A ASRS-18 avalia apenas o critério A do diagnóstico. Um diagnóstico de TDAH exige avaliação clínica completa por um profissional especializado. Se você está em sofrimento, procure ajuda.</div>' +
+      '<button class="btn primary" id="restart">Refazer teste</button>' +
+      '<p class="credits">Fonte: Adult ADHD Self-Report Scale (ASRS-v1.1) — OMS / Harvard NCS · adaptação brasileira <a href="https://tdah.org.br" target="_blank" rel="noopener">tdah.org.br</a>.</p>';
+
+    var detail = document.getElementById("detail");
+    var toggle = document.getElementById("toggle");
+    toggle.onclick = function () {
+      var open = detail.hasAttribute("hidden");
+      if (open) { detail.removeAttribute("hidden"); toggle.textContent = "Ocultar respostas"; toggle.setAttribute("aria-expanded", "true"); }
+      else { detail.setAttribute("hidden", ""); toggle.textContent = "Ver minhas respostas"; toggle.setAttribute("aria-expanded", "false"); }
+    };
+    document.getElementById("restart").onclick = function () {
+      state = { screen: "intro", answers: {}, index: 0 }; render();
+    };
+  }
+
+  // theme toggle
+  var themeBtn = document.getElementById("theme");
+  themeBtn.onclick = function () {
+    var root = document.documentElement;
+    var cur = root.getAttribute("data-theme");
+    var isDark = cur ? cur === "dark"
+      : window.matchMedia("(prefers-color-scheme: dark)").matches;
+    root.setAttribute("data-theme", isDark ? "light" : "dark");
+  };
+
+  render();
+})();
+</script>
+</body>
 </html>
